@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\AttendanceController; 
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +33,10 @@ Route::middleware('auth')->group(function () {
     // Tambahkan ini SEBELUM resource attendances
     Route::get('/attendances/report/pdf', [AttendanceController::class, 'downloadPdf'])->name('attendances.pdf');
     Route::resource('attendances', AttendanceController::class);
+
+    Route::resource('materials', MaterialController::class);
+    Route::post('/materials/step/add', [MaterialController::class, 'storeStep'])->name('materials.step.store');
+    Route::put('/materials/step/{id}', [MaterialController::class, 'updateStep'])->name('materials.step.update');
 });
 
 require __DIR__.'/auth.php';

@@ -11,10 +11,10 @@
                 
                 <div>
                     <span class="block text-xl font-bold whitespace-nowrap dark:text-white text-gray-800 tracking-tight">
-                        ProMag
+                        INTERNSHIP APP
                     </span>
                     <span class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider leading-tight">
-                        Internship App <br> PT. Pan Brothers Tbk
+                        PT. Pan Brothers Tbk
                     </span>
                 </div>
             </div>
