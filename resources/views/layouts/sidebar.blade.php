@@ -2,16 +2,20 @@
     <div class="h-full flex flex-col justify-between">
         <!-- Top Section -->
         <div class="px-3 py-4 overflow-y-auto">
-            <!-- Logo / Brand -->
             <div class="flex items-center mb-8 pl-3 mt-2">
-                <div class="p-2 bg-blue-600 rounded-lg mr-3 shadow-lg shadow-blue-500/30">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
+                <!-- LOGO IMAGE (Menggantikan Icon SVG) -->
+                <!-- Pastikan file ada di public/images/logo.png -->
+                <img src="{{ asset('images/images.png') }}" 
+                     alt="Logo Perusahaan" 
+                     class="w-12 h-12 mr-3 object-contain bg-white rounded-lg p-1 shadow-md">
+                
                 <div>
                     <span class="block text-xl font-bold whitespace-nowrap dark:text-white text-gray-800 tracking-tight">
                         ProMag
                     </span>
-                    <span class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider">Internship App</span>
+                    <span class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider leading-tight">
+                        Internship App <br> PT. Pan Brothers Tbk
+                    </span>
                 </div>
             </div>
 

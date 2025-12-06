@@ -234,11 +234,11 @@
                              
                              <div class="flex items-center gap-4">
                                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center font-bold text-lg border border-slate-600 shadow-inner">
-                                     M
+                                     NW
                                  </div>
                                  <div>
-                                     <p class="font-bold text-lg leading-tight">Bpk. Mentor</p>
-                                     <p class="text-xs text-slate-300 font-medium">Head of IT Division</p>
+                                     <p class="font-bold text-lg leading-tight">Bpk. Nengah Wijaya</p>
+                                     <p class="text-xs text-slate-300 font-medium">Chief of Werahouse Departement</p>
                                  </div>
                              </div>
                              

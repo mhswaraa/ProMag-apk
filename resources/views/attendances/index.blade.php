@@ -1,11 +1,18 @@
 <x-app-layout>
+    {{-- TYPE HINTING UNTUK VS CODE (Agar tidak error merah) --}}
+    @php
+        /** @var \Carbon\Carbon $currentDate */
+        /** @var \Carbon\Carbon $prevMonth */
+        /** @var \Carbon\Carbon $nextMonth */
+    @endphp
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Kalender Presensi') }}
         </h2>
     </x-slot>
 
-    <!-- 1. Wrapper Utama dengan Alpine Data untuk Modal -->
+    <!-- Wrapper Utama dengan Alpine Data untuk Modal -->
     <div class="py-12 bg-slate-50 dark:bg-gray-900 min-h-screen" x-data="{ showModal: false, detail: {} }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
@@ -18,104 +25,198 @@
             @endif
 
             <!-- 2. KPI SECTION (Top Cards - UPDATED) -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 
-                <!-- Card 1: Progress Masa Magang (Timeline) -->
-                <div class="bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-3xl shadow-lg text-white relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                    <div class="relative z-10 flex flex-col justify-between h-full">
+                <!-- CARD 1: PROGRESS & SISA WAKTU -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-3xl shadow-lg text-white relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                    <div class="relative z-10 h-full flex flex-col justify-between">
                         <div>
-                            <p class="text-xs font-bold text-indigo-200 uppercase tracking-wider">Periode Magang</p>
-                            <div class="flex items-baseline gap-1 mt-1">
-                                <h3 class="text-3xl font-black">{{ $magangProgress }}%</h3>
-                                <span class="text-xs text-indigo-300">Selesai</span>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Masa Magang</p>
+                                <span class="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded">
+                                    {{ $daysRemaining }} Hari Tersisa
+                                </span>
+                            </div>
+                            <div class="flex items-end gap-2 mt-2">
+                                <h3 class="text-4xl font-black text-white">{{ $magangProgress }}<span class="text-xl">%</span></h3>
+                                <span class="text-xs text-slate-400 mb-1.5 font-medium">Selesai</span>
                             </div>
                         </div>
-                        <div>
-                            <div class="w-full bg-slate-700/50 rounded-full h-1.5 mt-3 mb-2">
-                                <div class="bg-indigo-400 h-1.5 rounded-full transition-all duration-1000" style="width: {{ $magangProgress }}%"></div>
+                        
+                        <div class="mt-4">
+                            <div class="w-full bg-slate-700/50 rounded-full h-2 mb-2 overflow-hidden">
+                                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-1000" style="width: {{ $magangProgress }}%"></div>
                             </div>
-                            <div class="flex justify-between text-[10px] text-indigo-300 font-mono mb-1">
-                                <span>24 Nov 2025</span>
-                                <span>23 Mei 2026</span>
+                            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                                <span>{{ $daysPassed }} Hari Berjalan</span>
+                                <span>Total {{ $totalDaysInternship }} Hari</span>
                             </div>
-                            <p class="text-[10px] text-indigo-200 font-light text-center bg-white/10 rounded py-0.5">
-                                {{ $daysPassed }} / {{ $totalDaysInternship }} Hari Berjalan
+                            <p class="text-[10px] text-slate-500 mt-2 text-center border-t border-slate-700/50 pt-2">
+                                24 Nov 2025 - 23 Mei 2026
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card 2: Performa Jam Kerja -->
+                <!-- CARD 2: DETAIL STATISTIK KEHADIRAN -->
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group hover:border-blue-300 transition-colors">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Performa Bulan Ini</p>
-                    <div class="flex items-baseline gap-1 mt-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Statistik Kehadiran</p>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="text-3xl font-black text-slate-800 dark:text-white">{{ $totalHadir }}</span>
+                            <span class="text-xs font-bold text-slate-500 block">Hadir</span>
+                        </div>
+                        <div class="h-10 w-px bg-slate-100 dark:bg-slate-700"></div>
+                        <div class="text-right">
+                            <span class="text-lg font-bold text-blue-600">{{ $attendanceRate }}%</span>
+                            <span class="text-[10px] text-slate-400 block">Rate Kehadiran</span>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown Mini -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-amber-50 dark:bg-amber-900/10 rounded-xl p-2 text-center border border-amber-100 dark:border-amber-800/30">
+                            <span class="block text-sm font-black text-amber-600">{{ $totalIzin }}</span>
+                            <span class="text-[9px] font-bold text-amber-500 uppercase">Izin</span>
+                        </div>
+                        <div class="bg-red-50 dark:bg-red-900/10 rounded-xl p-2 text-center border border-red-100 dark:border-red-800/30">
+                            <span class="block text-sm font-black text-red-600">{{ $totalSakit }}</span>
+                            <span class="text-[9px] font-bold text-red-500 uppercase">Sakit</span>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-700 rounded-xl p-2 text-center border border-slate-200 dark:border-slate-600">
+                            <span class="block text-sm font-black text-slate-600 dark:text-slate-300">{{ $totalAlpa }}</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">Alpa</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: PRODUKTIVITAS & AKTIVITAS -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group hover:border-emerald-300 transition-colors">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Produktivitas & Output</p>
+                    
+                    <div class="flex items-end gap-2 mb-4">
                         <h3 class="text-3xl font-black text-slate-800 dark:text-white">{{ $totalHours }}</h3>
-                        <span class="text-sm font-medium text-slate-500">Jam</span>
+                        <div class="mb-1">
+                            <span class="text-xs font-bold text-slate-500 block">Jam Kerja</span>
+                            <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Avg: {{ $avgHours }} /hari</span>
+                        </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 text-xs font-bold">
-                            Avg: {{ $avgHours }} Jam/hari
-                        </span>
+
+                    <div class="space-y-2">
+                        <!-- Progress Materi -->
+                        <div>
+                            <div class="flex justify-between text-[10px] font-bold mb-1">
+                                <span class="text-purple-600">Pembelajaran ({{ $totalLearning }})</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                <div class="bg-purple-500 h-1.5 rounded-full" style="width: {{ ($totalLearning + $totalExecution) > 0 ? ($totalLearning / ($totalLearning + $totalExecution) * 100) : 0 }}%"></div>
+                            </div>
+                        </div>
+                        <!-- Progress Praktek -->
+                        <div>
+                            <div class="flex justify-between text-[10px] font-bold mb-1">
+                                <span class="text-emerald-600">Praktek Jobdesk ({{ $totalExecution }})</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ ($totalLearning + $totalExecution) > 0 ? ($totalExecution / ($totalLearning + $totalExecution) * 100) : 0 }}%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Card 3: Statistik Aktivitas (Materi vs Praktek) -->
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group hover:border-purple-300 transition-colors">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Aktivitas</p>
-                    <div class="flex items-center justify-between mt-3 px-1">
-                        <div class="text-center">
-                            <span class="block text-2xl font-black text-purple-600">{{ $totalLearning }}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Materi</span>
-                        </div>
-                        <div class="h-8 w-px bg-slate-200 dark:bg-slate-700"></div>
-                        <div class="text-center">
-                            <span class="block text-2xl font-black text-emerald-600">{{ $totalExecution }}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Praktek</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- CARD 4: STATUS HARI INI (QUICK ACTION) -->
+                @php
+                    $isAttendedToday = $attendances->has(\Carbon\Carbon::today()->format('Y-m-d'));
+                    $todayData = $isAttendedToday ? $attendances[\Carbon\Carbon::today()->format('Y-m-d')] : null;
+                @endphp
+                <div class="bg-gradient-to-br {{ $isAttendedToday ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700' }} p-6 rounded-3xl shadow-lg shadow-blue-500/20 text-white flex flex-col justify-between relative overflow-hidden group">
+                    <!-- Background Pattern -->
+                    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-soft-light"></div>
+                    <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/20 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
 
-                <!-- Card 4: Quick Action (Status Hari Ini) -->
-                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-3xl shadow-lg shadow-blue-500/30 text-white flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            @if($attendances->has(\Carbon\Carbon::today()->format('Y-m-d')))
-                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                <span class="text-[10px] font-bold text-blue-100 uppercase tracking-wider">Sudah Absen</span>
-                            @else
-                                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
-                                <span class="text-[10px] font-bold text-blue-100 uppercase tracking-wider">Belum Absen</span>
-                            @endif
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2.5 h-2.5 bg-white rounded-full {{ $isAttendedToday ? '' : 'animate-pulse' }}"></span>
+                            <span class="text-[10px] font-bold text-white/90 uppercase tracking-wider">
+                                {{ $isAttendedToday ? 'SUDAH ABSEN' : 'BELUM ABSEN' }}
+                            </span>
                         </div>
-                        <h4 class="font-bold text-sm leading-tight mt-1">
+                        <h4 class="font-bold text-lg leading-tight mb-1">
                             {{ \Carbon\Carbon::now()->translatedFormat('l, d M Y') }}
                         </h4>
+                        
+                        @if($isAttendedToday)
+                            <div class="mt-3 bg-white/20 backdrop-blur rounded-xl p-2 text-center border border-white/10">
+                                <p class="text-[10px] text-white/80 uppercase font-bold">Jam Kerja</p>
+                                <p class="text-sm font-mono font-bold">
+                                    {{ \Carbon\Carbon::parse($todayData->check_in)->format('H:i') }} - {{ $todayData->check_out ? \Carbon\Carbon::parse($todayData->check_out)->format('H:i') : '??:??' }}
+                                </p>
+                            </div>
+                        @endif
                     </div>
-                    @if(!$attendances->has(\Carbon\Carbon::today()->format('Y-m-d')))
-                        <a href="{{ route('attendances.create') }}" class="mt-3 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/20 text-center py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
-                            + Input Presensi
-                        </a>
-                    @else
-                        <button disabled class="mt-3 bg-white/10 text-white/50 border border-white/10 text-center py-2 rounded-xl text-xs font-bold cursor-not-allowed flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Data Tersimpan
-                        </button>
-                    @endif
+                    
+                    <div class="relative z-10 mt-4">
+                        @if(!$isAttendedToday)
+                            <a href="{{ route('attendances.create') }}" class="w-full bg-white text-blue-600 hover:bg-blue-50 border border-transparent text-center py-3 rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-2 transform active:scale-95">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Input Presensi
+                            </a>
+                        @else
+                            <button disabled class="w-full bg-black/20 text-white/70 border border-white/10 text-center py-3 rounded-xl text-xs font-bold cursor-not-allowed flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Data Tersimpan
+                            </button>
+                        @endif
+                    </div>
                 </div>
 
             </div>
-
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 mb-8">
+    <form action="{{ route('attendances.pdf') }}" method="GET" class="flex flex-col md:flex-row items-center gap-4 justify-between">
+        <div class="flex items-center gap-4 w-full md:w-auto">
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                <input type="date" name="start_date" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') }}" class="rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                <input type="date" name="end_date" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') }}" class="rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+            </div>
+        </div>
+        
+        <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 shadow-lg">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Download Laporan PDF
+        </button>
+    </form>
+</div>
             <!-- 3. CALENDAR SECTION -->
             <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-xl border border-slate-100 dark:border-slate-700">
                 
-                <!-- Calendar Header -->
-                <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-2xl font-black text-slate-800 dark:text-white">
-                        {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
-                    </h3>
-                    <div class="flex gap-2">
+                <!-- Calendar Header (With Navigation) -->
+                <div class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                    <div class="flex items-center gap-4 order-2 md:order-1">
+                        <!-- Prev Button -->
+                        <a href="{{ route('attendances.index', ['month' => $prevMonth->month, 'year' => $prevMonth->year]) }}" 
+                           class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-blue-100 hover:text-blue-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </a>
+                        
+                        <!-- Month Title -->
+                        <h3 class="text-2xl font-black text-slate-800 dark:text-white min-w-[180px] text-center">
+                            {{ $currentDate->translatedFormat('F Y') }}
+                        </h3>
+
+                        <!-- Next Button -->
+                        <a href="{{ route('attendances.index', ['month' => $nextMonth->month, 'year' => $nextMonth->year]) }}" 
+                           class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-blue-100 hover:text-blue-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+
+                    <div class="flex gap-2 order-1 md:order-2">
                         <span class="flex items-center gap-1 text-xs font-bold text-slate-500">
                             <span class="w-2 h-2 rounded-full bg-green-500"></span> Hadir
                         </span>
@@ -130,8 +231,7 @@
 
                 <!-- Calendar Grid -->
                 @php
-                    $startOfMonth = \Carbon\Carbon::now()->startOfMonth();
-                    $endOfMonth = \Carbon\Carbon::now()->endOfMonth();
+                    $startOfMonth = $currentDate->copy()->startOfMonth();
                     $daysInMonth = $startOfMonth->daysInMonth;
                     $startDayOfWeek = $startOfMonth->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
                 @endphp
@@ -152,10 +252,10 @@
                     <!-- Date Cells -->
                     @for($day = 1; $day <= $daysInMonth; $day++)
                         @php
-                            $currentDate = \Carbon\Carbon::createFromDate(null, null, $day)->format('Y-m-d');
-                            $attendance = $attendances[$currentDate] ?? null;
-                            $isToday = $currentDate == \Carbon\Carbon::now()->format('Y-m-d');
-                            $isWeekend = \Carbon\Carbon::createFromDate(null, null, $day)->isWeekend();
+                            $loopDate = $currentDate->copy()->day($day)->format('Y-m-d');
+                            $attendance = $attendances[$loopDate] ?? null;
+                            $isToday = $loopDate == \Carbon\Carbon::now()->format('Y-m-d');
+                            $isWeekend = $currentDate->copy()->day($day)->isWeekend();
                         @endphp
 
                         <div 
@@ -212,7 +312,7 @@
                                         </p>
                                     @endif
                                 </div>
-                            @elseif(!$isWeekend && $currentDate <= \Carbon\Carbon::now()->format('Y-m-d'))
+                            @elseif(!$isWeekend && $loopDate <= \Carbon\Carbon::now()->format('Y-m-d'))
                                 <!-- Button Input for Past/Current Empty Days -->
                                 <a href="{{ route('attendances.create') }}" class="absolute inset-0 flex items-center justify-center bg-slate-100/50 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
                                     <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">

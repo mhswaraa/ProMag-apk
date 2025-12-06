@@ -15,11 +15,26 @@
                     </button>
                 </div>
 
-                <!-- Page Title / Breadcrumb Placeholder (Desktop) -->
+                <!-- Page Title / Breadcrumb Placeholder (Desktop) - UPDATED WITH ICONS -->
                 <div class="hidden sm:flex sm:items-center sm:ms-4">
-                    <h2 class="font-semibold text-lg text-gray-700 dark:text-gray-200 leading-tight tracking-wide">
-                        {{-- Nama Halaman bisa dinamis disini --}}
-                        Monitoring Progress
+                    <h2 class="font-bold text-xl text-slate-800 dark:text-white leading-tight tracking-tight border-l-4 border-blue-600 dark:border-blue-500 pl-4 py-1 flex items-center gap-2">
+                        @if(request()->routeIs('dashboard'))
+                            <!-- Icon Dashboard -->
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                            Dashboard Utama
+                        @elseif(request()->routeIs('attendances.*'))
+                            <!-- Icon Presensi -->
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Presensi & Logbook Harian
+                        @elseif(request()->routeIs('profile.*'))
+                            <!-- Icon Profil -->
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            Profil Pengguna
+                        @else
+                            <!-- Icon Default (Chart) -->
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Monitoring Progress
+                        @endif
                     </h2>
                 </div>
             </div>

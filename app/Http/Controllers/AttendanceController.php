@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\DailyActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf; // <--- TAMBAHKAN INI
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
@@ -13,29 +14,83 @@ class AttendanceController extends Controller
     /**
      * Menampilkan daftar riwayat presensi.
      */
-    public function index()
+    public function index(Request $request)
     {
         $userId = Auth::id();
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
 
-        // 1. Ambil data presensi FULL satu bulan ini
+        // --- KONFIGURASI PERIODE MAGANG ---
+        $startDate = Carbon::create(2025, 11, 24); // Tanggal Mulai
+        $endDate = Carbon::create(2026, 05, 23);   // Tanggal Selesai
+        // ----------------------------------
+
+        // 1. Logika Navigasi Bulan
+        if ($request->has('month') && $request->has('year')) {
+            $currentDate = Carbon::createFromDate($request->year, $request->month, 1);
+        } else {
+            $currentDate = Carbon::now();
+        }
+
+        $prevMonth = $currentDate->copy()->subMonth();
+        $nextMonth = $currentDate->copy()->addMonth();
+
+        // 2. Ambil data presensi (Untuk Kalender View)
         $attendances = Attendance::where('user_id', $userId)
-                        ->whereMonth('date', $currentMonth)
-                        ->whereYear('date', $currentYear)
+                        ->whereMonth('date', $currentDate->month)
+                        ->whereYear('date', $currentDate->year)
                         ->with('daily_activities')
                         ->get()
                         ->keyBy('date');
 
-        // 2. Hitung Statistik Presensi Bulan Ini
-        $totalHadir = $attendances->where('status', 'hadir')->count();
-        $totalIzin = $attendances->where('status', 'izin')->count();
-        $totalSakit = $attendances->where('status', 'sakit')->count();
-        $totalAlpa = $attendances->where('status', 'alpa')->count();
+        // 3. Hitung Statistik GLOBAL (Keseluruhan)
+        $allAttendances = Attendance::where('user_id', $userId)->get(); // Ambil semua riwayat
+
+        $totalHadir = $allAttendances->where('status', 'hadir')->count();
+        $totalIzin = $allAttendances->where('status', 'izin')->count();
+        $totalSakit = $allAttendances->where('status', 'sakit')->count();
         
-        // Hitung Jam Kerja Bulan Ini
+        // --- LOGIKA BARU: HITUNG AUTO ALPHA & PERSENTASE KEHADIRAN ---
+        
+        $today = Carbon::now()->startOfDay();
+        // Batasi perhitungan sampai hari ini atau tanggal selesai magang (jika sudah lewat)
+        $calculationLimit = $today->gt($endDate) ? $endDate : $today;
+        
+        $autoAlpa = 0;
+        $tempDate = $startDate->copy()->startOfDay();
+
+        // Ambil daftar tanggal yang sudah ada statusnya (hadir/izin/sakit/alpa)
+        $recordedDates = $allAttendances->pluck('date')->map(function($date) {
+            return Carbon::parse($date)->format('Y-m-d');
+        })->toArray();
+
+        // Loop dari hari pertama sampai hari ini untuk mencari hari kosong (Alpha)
+        while ($tempDate->lte($calculationLimit)) {
+            // Cek apakah hari ini adalah Hari Kerja (Senin-Jumat)
+            if ($tempDate->isWeekday()) {
+                $dateString = $tempDate->format('Y-m-d');
+                
+                // Jika tanggal ini TIDAK ADA di database, hitung sebagai ALPA
+                if (!in_array($dateString, $recordedDates)) {
+                    $autoAlpa++;
+                }
+            }
+            $tempDate->addDay();
+        }
+
+        // Tambahkan dengan Alpa manual yang mungkin diinput di DB
+        $manualAlpa = $allAttendances->where('status', 'alpa')->count();
+        $totalAlpa = $autoAlpa + $manualAlpa;
+
+        // HITUNG PERSENTASE KEHADIRAN (Attendance Rate)
+        // Total Hari Kerja Berlalu = Hadir + Izin + Sakit + Alpha (Auto & Manual)
+        $totalElapsedWorkdays = $totalHadir + $totalIzin + $totalSakit + $totalAlpa;
+        
+        // Rumus: (Total Hadir / Total Hari Kerja Berlalu) * 100
+        $attendanceRate = $totalElapsedWorkdays > 0 ? round(($totalHadir / $totalElapsedWorkdays) * 100) : 0;
+        // --------------------------------------
+
+        // Hitung Jam Kerja
         $totalSeconds = 0;
-        foreach($attendances as $att) {
+        foreach($allAttendances as $att) {
             if($att->check_in && $att->check_out) {
                 $start = Carbon::parse($att->check_in);
                 $end = Carbon::parse($att->check_out);
@@ -45,8 +100,7 @@ class AttendanceController extends Controller
         $totalHours = $totalSeconds > 0 ? round($totalSeconds / 3600, 1) : 0;
         $avgHours = $totalHadir > 0 ? round($totalHours / $totalHadir, 1) : 0;
 
-        // 3. Hitung Total Aktivitas (Kumulatif Selama Magang)
-        // Kita gunakan query terpisah agar menghitung semua data, bukan cuma bulan ini
+        // 4. Hitung Total Aktivitas
         $totalLearning = DailyActivity::whereHas('attendance', function($q) use ($userId) {
             $q->where('user_id', $userId);
         })->where('type', 'learning')->count();
@@ -55,26 +109,29 @@ class AttendanceController extends Controller
             $q->where('user_id', $userId);
         })->where('type', 'execution')->count();
 
-        // 4. Hitung KPI Progress Masa Magang (Waktu)
-        $startDate = Carbon::create(2024, 11, 24); // Tanggal Mulai
-        $endDate = $startDate->copy()->addMonths(6); // Tanggal Selesai (6 Bulan)
+        // 5. Hitung KPI Progress Masa Magang
+        $totalDaysInternship = $startDate->diffInDays($endDate); 
+        $daysPassed = $startDate->startOfDay()->diffInDays($today);
         
-        $totalDaysInternship = $startDate->diffInDays($endDate); // Total hari magang (misal 180 hari)
-        $daysPassed = $startDate->diffInDays(Carbon::now()); // Hari yang sudah dilalui
-        
-        // Hitung Persentase (Cegah error jika belum mulai atau sudah lewat)
-        if (Carbon::now()->lt($startDate)) {
+        if ($today->lt($startDate)) {
             $magangProgress = 0;
+            $daysPassed = 0;
+        } elseif ($today->gt($endDate)) {
+            $magangProgress = 100;
+            $daysPassed = $totalDaysInternship;
         } else {
-            $magangProgress = min(100, round(($daysPassed / $totalDaysInternship) * 100));
+            $magangProgress = round(($daysPassed / $totalDaysInternship) * 100);
         }
+        
+        $daysRemaining = max(0, $totalDaysInternship - $daysPassed);
 
         return view('attendances.index', compact(
             'attendances', 
-            'totalHadir', 'totalIzin', 'totalSakit', 'totalAlpa',
+            'totalHadir', 'totalIzin', 'totalSakit', 'totalAlpa', 'attendanceRate', // Kirim attendanceRate ke View
             'totalHours', 'avgHours',
             'totalLearning', 'totalExecution', 
-            'magangProgress', 'daysPassed', 'totalDaysInternship'
+            'magangProgress', 'daysPassed', 'totalDaysInternship', 'daysRemaining',
+            'currentDate', 'prevMonth', 'nextMonth'
         ));
     }
 
@@ -172,5 +229,52 @@ class AttendanceController extends Controller
         }
 
         return redirect()->route('attendances.index')->with('success', 'Logbook berhasil diperbarui!');
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $userId = Auth::id();
+        
+        // Default: Periode Bulan Ini jika tidak ada input tanggal
+        $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now()->startOfMonth();
+        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date')) : Carbon::now()->endOfMonth();
+
+        // Ambil Data Presensi dalam Rentang Tanggal
+        $attendances = Attendance::where('user_id', $userId)
+                        ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                        ->with('daily_activities')
+                        ->orderBy('date', 'asc')
+                        ->get();
+
+        // Hitung Ringkasan untuk Header Laporan
+        $summary = [
+            'hadir' => $attendances->where('status', 'hadir')->count(),
+            'izin' => $attendances->where('status', 'izin')->count(),
+            'sakit' => $attendances->where('status', 'sakit')->count(),
+            'alpa' => $attendances->where('status', 'alpa')->count(),
+            'total_jam' => 0
+        ];
+
+        foreach($attendances as $att) {
+            if($att->check_in && $att->check_out) {
+                $start = Carbon::parse($att->check_in);
+                $end = Carbon::parse($att->check_out);
+                $summary['total_jam'] += $end->diffInHours($start);
+            }
+        }
+
+        // Load View PDF
+        $pdf = Pdf::loadView('attendances.pdf', [
+            'attendances' => $attendances,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'user' => Auth::user(),
+            'summary' => $summary
+        ]);
+
+        // Setup Kertas A4 Portrait
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Laporan_Magang_' . Auth::user()->name . '.pdf');
     }
 }
