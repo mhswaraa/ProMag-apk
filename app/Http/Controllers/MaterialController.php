@@ -21,18 +21,22 @@ class MaterialController extends Controller
         return view('materials.index', compact('materials'));
     }
 
-    // Function untuk Update Progress Poin
+    // UPDATE SUB-POIN (Child) - Lebih Fleksibel
     public function updateStep(Request $request, $id)
     {
         $step = MaterialStep::findOrFail($id);
         
-        $step->update([
-            'status' => $request->status,
-            'user_notes' => $request->user_notes,
-            'completed_at' => $request->status == 'completed' ? now() : null,
-        ]);
+        // Kita gunakan array filter agar hanya mengupdate field yang dikirim saja
+        // Ini memungkinkan kita edit Title saja, atau Status saja tanpa menimpa yang lain
+        $data = array_filter($request->only(['title', 'status', 'user_notes', 'obstacles']));
 
-        return back()->with('success', 'Progress berhasil diperbarui!');
+        if ($request->has('status') && $request->status == 'completed') {
+            $data['completed_at'] = now();
+        }
+
+        $step->update($data);
+
+        return back()->with('success', 'Update berhasil!');
     }
 
     // Function Tambah Materi Baru
@@ -64,4 +68,50 @@ class MaterialController extends Controller
 
         return back();
     }
+
+    public function destroy(Material $material)
+    {
+        // Pastikan hanya pemilik yang bisa menghapus
+        if ($material->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Hapus semua steps terkait terlebih dahulu (Opsional jika sudah set on cascade delete di migration)
+        $material->steps()->delete();
+        
+        // Hapus materi
+        $material->delete();
+
+        return back()->with('success', 'Topik materi berhasil dihapus.');
+    }
+
+    // TAMBAHKAN: Hapus Sub-Poin (Step)
+    public function destroyStep($id)
+    {
+        $step = MaterialStep::findOrFail($id);
+        
+        // Validasi kepemilikan (via relation materi)
+        if ($step->material->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $step->delete();
+
+        return back()->with('success', 'Langkah pembelajaran dihapus.');
+    }
+    // UPDATE TOPIK UTAMA (Parent)
+    public function update(Request $request, $id)
+    {
+        $material = Material::where('user_id', Auth::id())->findOrFail($id);
+
+        $material->update([
+            'title' => $request->title,
+            'category' => $request->category,
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Informasi topik berhasil diperbarui!');
+    }
+
+    
 }

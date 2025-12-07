@@ -35,8 +35,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('attendances', AttendanceController::class);
 
     Route::resource('materials', MaterialController::class);
+    
+    // Feature: Steps / Sub-Points
     Route::post('/materials/step/add', [MaterialController::class, 'storeStep'])->name('materials.step.store');
     Route::put('/materials/step/{id}', [MaterialController::class, 'updateStep'])->name('materials.step.update');
+    
+    // TAMBAHKAN BARIS INI:
+    Route::delete('/materials/step/{id}', [MaterialController::class, 'destroyStep'])->name('materials.step.destroy');
 });
 
 require __DIR__.'/auth.php';
