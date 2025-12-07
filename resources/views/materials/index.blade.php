@@ -16,7 +16,22 @@
          }"
          x-init="$watch('activeMaterial', value => localStorage.setItem('promag_active_material', value))">
         
-        <!-- STATS SUMMARY CARDS -->
+        <div class="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 h-full">
+
+            <!-- HEADER & ACTIONS -->
+            <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
+                <div>
+                    <h3 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Curriculum Tracker</h3>
+                    <p class="text-slate-500 text-sm">Pantau progress pembelajaran dan penguasaan materi magangmu.</p>
+                </div>
+                <button onclick="document.getElementById('modalAddMaterial').showModal()" 
+                        class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 hover:-translate-y-0.5">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Topik
+                </button>
+            </div>
+
+            <!-- STATS SUMMARY SECTION -->
             @php
                 $totalTopics = $materials->count();
                 $allSteps = $materials->pluck('steps')->flatten();
@@ -30,60 +45,49 @@
                 $countTools = $materials->where('category', 'Tools')->count();
             @endphp
             
-            <!-- Row 1: General Stats -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <!-- Card 1 -->
+                <!-- Card Stats 1-4 -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Topik</div>
                     <div class="text-2xl font-black text-slate-800 dark:text-white">{{ $totalTopics }}</div>
                 </div>
-                <!-- Card 2 -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Sub-Poin</div>
                     <div class="text-2xl font-black text-slate-800 dark:text-white">{{ $totalSteps }}</div>
                 </div>
-                <!-- Card 3 -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Selesai</div>
                     <div class="text-2xl font-black text-emerald-500">{{ $completedSteps }}</div>
                 </div>
-                <!-- Card 4 -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Progress Global</div>
                     <div class="text-2xl font-black text-blue-600">{{ $globalProgress }}%</div>
                 </div>
             </div>
 
-            <!-- Row 2: Category Stats (Hard Skill, Soft Skill, Tools) -->
+            <!-- Category Breakdown -->
             <div class="grid grid-cols-3 gap-4 mb-8">
-                <!-- Hard Skill -->
                 <div class="bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-2xl border border-blue-100 dark:border-blue-800/30 text-center">
                     <p class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Hard Skill</p>
                     <p class="text-xl font-black text-blue-700 dark:text-blue-300">{{ $countHardSkill }}</p>
                 </div>
-                <!-- Soft Skill -->
                 <div class="bg-purple-50/50 dark:bg-purple-900/10 p-3 rounded-2xl border border-purple-100 dark:border-purple-800/30 text-center">
                     <p class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">Soft Skill</p>
                     <p class="text-xl font-black text-purple-700 dark:text-purple-300">{{ $countSoftSkill }}</p>
                 </div>
-                <!-- Tools -->
                 <div class="bg-orange-50/50 dark:bg-orange-900/10 p-3 rounded-2xl border border-orange-100 dark:border-orange-800/30 text-center">
                     <p class="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Tools</p>
                     <p class="text-xl font-black text-orange-700 dark:text-orange-300">{{ $countTools }}</p>
                 </div>
             </div>
 
-            <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-180px)]">
-            
+            <!-- MAIN CONTENT AREA (MASTER-DETAIL) -->
+            <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px]">
                 
                 <!-- LEFT COLUMN: LIST MATERI -->
                 <div class="w-full lg:w-1/3 flex flex-col h-full bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                         <h3 class="font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm">Daftar Topik</h3>
-                        <button onclick="document.getElementById('modalAddMaterial').showModal()" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Baru
-                        </button>
                     </div>
 
                     <div class="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
@@ -125,7 +129,6 @@
 
                 <!-- RIGHT COLUMN: DETAIL CONTENT -->
                 <div class="w-full lg:w-2/3 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-full relative">
-                
                     
                     @if($materials->count() > 0)
                         @foreach($materials as $material)
@@ -139,12 +142,17 @@
                                         <div>
                                             <div class="flex items-center gap-3 mb-2">
                                                 <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white">{{ $material->title }}</h2>
+                                                <!-- Tombol Edit Judul Topik -->
+                                                <button onclick="document.getElementById('modalEditMaterial-{{ $material->id }}').showModal()" 
+                                                        class="text-slate-400 hover:text-blue-600 transition">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                                </button>
                                             </div>
                                             <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-2xl">{{ $material->description }}</p>
                                         </div>
 
                                         <!-- DELETE BUTTON (TOPIC) -->
-                                        <form action="{{ route('materials.destroy', $material->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus topik ini beserta seluruh isinya?');">
+                                        <form action="{{ route('materials.destroy', $material->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus Topik ini beserta seluruh sub-poinnya?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" title="Hapus Topik">
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -183,7 +191,7 @@
                                     <!-- Timeline Steps -->
                                     <div class="relative pl-6 border-l-2 border-slate-100 dark:border-slate-700 space-y-8">
                                         @forelse($material->steps as $step)
-                                            <div class="relative pl-14 pb-8 group" x-data="{ isCompleted: '{{ $step->status }}' === 'completed', isEditing: false }">
+                                            <div class="relative pl-14 pb-8 group" x-data="{ isCompleted: '{{ $step->status }}' === 'completed', isEditing: false, isEditingTitle: false }">
                                                 
                                                 <!-- Timeline Dot -->
                                                 <div class="absolute left-0 top-0 w-14 flex justify-center z-10">
@@ -198,19 +206,39 @@
                                                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-md"
                                                      :class="isCompleted ? 'border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20' : 'border-slate-200 dark:border-slate-700'">
                                                     
-                                                    <div class="flex justify-between items-start mb-4">
-                                                        <h5 class="text-sm font-bold text-slate-800 dark:text-white" :class="isCompleted ? 'line-through text-slate-400' : ''">
-                                                            {{ $step->title }}
-                                                        </h5>
+                                                    <div class="flex justify-between items-start mb-3">
+                                                        <!-- JUDUL (Bisa Diedit) -->
+                                                        <div class="flex-grow mr-2">
+                                                            <!-- View Mode -->
+                                                            <h5 x-show="!isEditingTitle" class="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2 group/title" :class="isCompleted ? 'line-through text-slate-400' : ''">
+                                                                {{ $step->title }}
+                                                                <button @click="isEditingTitle = true" class="opacity-0 group-hover/title:opacity-100 text-slate-300 hover:text-blue-500 transition-opacity">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                                                </button>
+                                                            </h5>
+                                                            <!-- Edit Mode -->
+                                                            <div x-show="isEditingTitle" class="flex gap-2">
+                                                                <form action="{{ route('materials.step.update', $step->id) }}" method="POST" class="flex gap-2 w-full">
+                                                                    @csrf @method('PUT')
+                                                                    <input type="text" name="title" value="{{ $step->title }}" class="w-full text-sm py-1 px-2 rounded border border-blue-300 focus:ring-blue-500">
+                                                                    <button type="submit" class="text-green-500 hover:text-green-700" title="Simpan">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                    </button>
+                                                                    <button type="button" @click="isEditingTitle = false" class="text-red-400 hover:text-red-600" title="Batal">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
                                                         
-                                                        <div class="flex items-center gap-2">
+                                                        <div class="flex items-center gap-2 flex-shrink-0">
                                                             <!-- Reset Button -->
                                                             <form x-show="isCompleted" action="{{ route('materials.step.update', $step->id) }}" method="POST">
                                                                 @csrf @method('PUT')
                                                                 <input type="hidden" name="status" value="todo">
                                                                 <input type="hidden" name="user_notes" value="{{ $step->user_notes }}">
                                                                 <input type="hidden" name="obstacles" value="{{ $step->obstacles }}">
-                                                                <button class="text-[10px] font-bold text-slate-400 hover:text-blue-500 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded shadow-sm" title="Kembalikan status">
+                                                                <button class="text-[10px] font-bold text-slate-400 hover:text-blue-500 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded shadow-sm">
                                                                     RESET
                                                                 </button>
                                                             </form>
@@ -231,7 +259,6 @@
                                                             @csrf @method('PUT')
                                                             <input type="hidden" name="status" value="completed">
                                                             
-                                                            <!-- Input Hasil Belajar -->
                                                             <div class="mb-4">
                                                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Catatan Hasil Belajar</label>
                                                                 <textarea name="user_notes" rows="4" required 
@@ -239,12 +266,11 @@
                                                                         placeholder="Apa hasil belajarmu? (Contoh:&#10;1. Poin satu&#10;2. Poin dua)">{{ $step->user_notes }}</textarea>
                                                             </div>
 
-                                                            <!-- Input Kendala -->
                                                             <div class="mb-4">
                                                                 <label class="block text-[10px] font-bold text-red-400 uppercase tracking-wider mb-2">Kendala di Lapangan (Opsional)</label>
                                                                 <textarea name="obstacles" rows="2" 
                                                                         class="w-full rounded-lg border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10 text-sm p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 text-slate-700 dark:text-slate-300 resize-none shadow-inner placeholder:text-red-300/50"
-                                                                        placeholder="Apakah ada kesulitan atau hambatan saat mempraktekkan ini?">{{ $step->obstacles }}</textarea>
+                                                                        placeholder="Apakah ada kesulitan?">{{ $step->obstacles }}</textarea>
                                                             </div>
                                                             
                                                             <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
@@ -258,13 +284,11 @@
 
                                                     <!-- View Catatan & Kendala -->
                                                     <div x-show="isCompleted && !isEditing" class="space-y-3">
-                                                        <!-- Hasil Belajar -->
                                                         <div class="bg-emerald-50/50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800/30 relative">
                                                             <span class="absolute top-2 right-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-emerald-100">Result</span>
                                                             <div class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{{ $step->user_notes }}</div>
                                                         </div>
 
-                                                        <!-- Kendala (Jika Ada) -->
                                                         @if($step->obstacles)
                                                             <div class="bg-red-50/50 dark:bg-red-900/10 p-4 rounded-xl border border-red-100 dark:border-red-800/30 flex gap-3 items-start">
                                                                 <div class="mt-0.5 p-1 bg-red-100 dark:bg-red-900/50 rounded-md text-red-500 flex-shrink-0">
@@ -280,7 +304,7 @@
                                                         <div class="flex justify-end pt-2">
                                                             <button @click="isEditing = true" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline uppercase tracking-wide flex items-center gap-1">
                                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                                                Edit Data
+                                                                Edit Catatan
                                                             </button>
                                                         </div>
                                                     </div>
@@ -296,6 +320,39 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- MODAL EDIT MATERIAL (Topic) -->
+                            <dialog id="modalEditMaterial-{{ $material->id }}" class="modal rounded-2xl shadow-2xl p-0 w-full max-w-lg backdrop:bg-slate-900/50">
+                                <div class="bg-white dark:bg-slate-800 p-6">
+                                    <h3 class="font-bold text-lg text-slate-800 dark:text-white mb-4">Edit Topik Materi</h3>
+                                    <form action="{{ route('materials.update', $material->id) }}" method="POST">
+                                        @csrf @method('PUT')
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Judul Materi</label>
+                                                <input type="text" name="title" value="{{ $material->title }}" class="w-full rounded-xl border-slate-300 focus:border-blue-500 dark:bg-slate-700 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kategori</label>
+                                                <select name="category" class="w-full rounded-xl border-slate-300 focus:border-blue-500 dark:bg-slate-700 dark:text-white">
+                                                    <option value="Hard Skill" {{ $material->category == 'Hard Skill' ? 'selected' : '' }}>Hard Skill</option>
+                                                    <option value="Soft Skill" {{ $material->category == 'Soft Skill' ? 'selected' : '' }}>Soft Skill</option>
+                                                    <option value="Tools" {{ $material->category == 'Tools' ? 'selected' : '' }}>Tools & Software</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deskripsi</label>
+                                                <textarea name="description" rows="3" class="w-full rounded-xl border-slate-300 focus:border-blue-500 dark:bg-slate-700 dark:text-white">{{ $material->description }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="mt-6 flex justify-end gap-2">
+                                            <button type="button" onclick="document.getElementById('modalEditMaterial-{{ $material->id }}').close()" class="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 font-bold">Batal</button>
+                                            <button type="submit" class="px-6 py-2 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </dialog>
+
                         @endforeach
                     @else
                         <!-- Empty State Global -->
@@ -366,11 +423,13 @@
     </dialog>
 
     <style>
+        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
         
+        /* Radial Progress */
         .radial-progress {
             position: relative; display: inline-grid; width: var(--size); height: var(--size);
             place-content: center; border-radius: 9999px; background-color: transparent;
