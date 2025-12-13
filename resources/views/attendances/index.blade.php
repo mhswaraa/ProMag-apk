@@ -25,15 +25,15 @@
             @endif
 
             <!-- 2. KPI SECTION (Top Cards - UPDATED) -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 
                 <!-- CARD 1: PROGRESS & SISA WAKTU -->
-                <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-3xl shadow-lg text-white relative overflow-hidden group">
+                <div class="bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-3xl shadow-lg text-white relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
                     <div class="relative z-10 h-full flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Masa Magang</p>
+                                <p class="text-xs font-bold text-indigo-200 uppercase tracking-wider">Masa Magang</p>
                                 <span class="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded">
                                     {{ $daysRemaining }} Hari Tersisa
                                 </span>
@@ -173,25 +173,28 @@
                 </div>
 
             </div>
+            
+            <!-- BUTTON DOWNLOAD PDF -->
             <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 mb-8">
-    <form action="{{ route('attendances.pdf') }}" method="GET" class="flex flex-col md:flex-row items-center gap-4 justify-between">
-        <div class="flex items-center gap-4 w-full md:w-auto">
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
-                <input type="date" name="start_date" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') }}" class="rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                <form action="{{ route('attendances.pdf') }}" method="GET" class="flex flex-col md:flex-row items-center gap-4 justify-between">
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                            <input type="date" name="start_date" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') }}" class="rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                            <input type="date" name="end_date" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') }}" class="rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 shadow-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Download Laporan PDF
+                    </button>
+                </form>
             </div>
-            <div class="flex flex-col">
-                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
-                <input type="date" name="end_date" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') }}" class="rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
-            </div>
-        </div>
-        
-        <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 shadow-lg">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            Download Laporan PDF
-        </button>
-    </form>
-</div>
+
             <!-- 3. CALENDAR SECTION -->
             <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-xl border border-slate-100 dark:border-slate-700">
                 
@@ -333,7 +336,7 @@
 
         </div>
 
-        <!-- 4. MODAL POP UP (Detail & Edit) -->
+        <!-- 4. MODAL POP UP (Detail & Edit - UPDATED WITH OBSTACLES) -->
         <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <!-- Backdrop -->
             <div x-show="showModal" 
@@ -383,17 +386,32 @@
                                     <!-- Activities List (For Hadir) -->
                                     <div x-show="detail.status === 'hadir'">
                                         <p class="text-xs text-slate-400 uppercase font-bold mb-3">Aktivitas Harian</p>
-                                        <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                        <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                             <template x-for="activity in detail.daily_activities">
-                                                <div class="p-3 border border-slate-100 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                                                <div class="p-3 border border-slate-100 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition mb-3">
                                                     <div class="flex items-start gap-3">
                                                         <div class="p-1.5 rounded-lg" :class="activity.type === 'learning' ? 'bg-purple-100 text-purple-600' : 'bg-emerald-100 text-emerald-600'">
                                                             <svg x-show="activity.type === 'learning'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                                                             <svg x-show="activity.type !== 'learning'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                         </div>
-                                                        <div>
+                                                        <div class="flex-1">
                                                             <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="activity.title"></p>
-                                                            <p class="text-xs text-slate-500 mt-1 leading-relaxed" x-text="activity.description"></p>
+                                                            <p class="text-xs text-slate-500 mt-1 leading-relaxed whitespace-pre-wrap" x-text="activity.description"></p>
+                                                            
+                                                            <!-- NEW SECTION: Obstacles & Improvements -->
+                                                            <div class="mt-3 grid gap-2" x-show="activity.obstacles || activity.improvements">
+                                                                 <!-- Obstacles -->
+                                                                 <div x-show="activity.obstacles" class="flex gap-2 items-start bg-red-50 dark:bg-red-900/10 p-2 rounded-lg border border-red-100 dark:border-red-900/30">
+                                                                    <span class="text-[10px] font-bold text-red-500 uppercase tracking-wide mt-0.5 min-w-[60px]">Kendala:</span>
+                                                                    <p class="text-xs text-slate-600 dark:text-slate-300 italic whitespace-pre-wrap" x-text="activity.obstacles"></p>
+                                                                 </div>
+                                                                 <!-- Improvements -->
+                                                                 <div x-show="activity.improvements" class="flex gap-2 items-start bg-green-50 dark:bg-green-900/10 p-2 rounded-lg border border-green-100 dark:border-green-900/30">
+                                                                    <span class="text-[10px] font-bold text-green-600 uppercase tracking-wide mt-0.5 min-w-[60px]">Solusi:</span>
+                                                                    <p class="text-xs text-slate-600 dark:text-slate-300 italic whitespace-pre-wrap" x-text="activity.improvements"></p>
+                                                                 </div>
+                                                            </div>
+
                                                         </div>
                                                     </div>
                                                 </div>

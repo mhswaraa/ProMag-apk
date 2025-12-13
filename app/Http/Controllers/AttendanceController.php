@@ -6,13 +6,13 @@ use App\Models\Attendance;
 use App\Models\DailyActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf; // <--- TAMBAHKAN INI
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AttendanceController extends Controller
 {
     /**
-     * Menampilkan daftar riwayat presensi.
+     * Menampilkan daftar riwayat presensi & statistik dashboard.
      */
     public function index(Request $request)
     {
@@ -23,7 +23,7 @@ class AttendanceController extends Controller
         $endDate = Carbon::create(2026, 05, 23);   // Tanggal Selesai
         // ----------------------------------
 
-        // 1. Logika Navigasi Bulan
+        // 1. Logika Navigasi Bulan (Untuk Kalender)
         if ($request->has('month') && $request->has('year')) {
             $currentDate = Carbon::createFromDate($request->year, $request->month, 1);
         } else {
@@ -33,7 +33,7 @@ class AttendanceController extends Controller
         $prevMonth = $currentDate->copy()->subMonth();
         $nextMonth = $currentDate->copy()->addMonth();
 
-        // 2. Ambil data presensi (Untuk Kalender View)
+        // 2. Ambil data presensi BULAN INI (Khusus untuk tampilan Kalender Grid)
         $attendances = Attendance::where('user_id', $userId)
                         ->whereMonth('date', $currentDate->month)
                         ->whereYear('date', $currentDate->year)
@@ -41,8 +41,9 @@ class AttendanceController extends Controller
                         ->get()
                         ->keyBy('date');
 
-        // 3. Hitung Statistik GLOBAL (Keseluruhan)
-        $allAttendances = Attendance::where('user_id', $userId)->get(); // Ambil semua riwayat
+        // 3. Hitung Statistik KESELURUHAN (GLOBAL / ALL TIME)
+        // Kita query ulang tanpa filter bulan/tahun untuk mendapatkan total akumulasi
+        $allAttendances = Attendance::where('user_id', $userId)->get();
 
         $totalHadir = $allAttendances->where('status', 'hadir')->count();
         $totalIzin = $allAttendances->where('status', 'izin')->count();
@@ -88,19 +89,21 @@ class AttendanceController extends Controller
         $attendanceRate = $totalElapsedWorkdays > 0 ? round(($totalHadir / $totalElapsedWorkdays) * 100) : 0;
         // --------------------------------------
 
-        // Hitung Jam Kerja
+        // Hitung Total Jam Kerja Keseluruhan
         $totalSeconds = 0;
         foreach($allAttendances as $att) {
-            if($att->check_in && $att->check_out) {
+            if($att->status == 'hadir' && $att->check_in && $att->check_out) {
                 $start = Carbon::parse($att->check_in);
                 $end = Carbon::parse($att->check_out);
                 $totalSeconds += $end->diffInSeconds($start);
             }
         }
         $totalHours = $totalSeconds > 0 ? round($totalSeconds / 3600, 1) : 0;
+        
+        // Rata-rata jam kerja (Keseluruhan)
         $avgHours = $totalHadir > 0 ? round($totalHours / $totalHadir, 1) : 0;
 
-        // 4. Hitung Total Aktivitas
+        // 4. Hitung Total Aktivitas (Keseluruhan)
         $totalLearning = DailyActivity::whereHas('attendance', function($q) use ($userId) {
             $q->where('user_id', $userId);
         })->where('type', 'learning')->count();
@@ -122,36 +125,42 @@ class AttendanceController extends Controller
         } else {
             $magangProgress = round(($daysPassed / $totalDaysInternship) * 100);
         }
-        
         $daysRemaining = max(0, $totalDaysInternship - $daysPassed);
 
         return view('attendances.index', compact(
-            'attendances', 
-            'totalHadir', 'totalIzin', 'totalSakit', 'totalAlpa', 'attendanceRate', // Kirim attendanceRate ke View
-            'totalHours', 'avgHours',
-            'totalLearning', 'totalExecution', 
+            'attendances', // Data bulan ini (untuk kalender)
+            'totalHadir', 'totalIzin', 'totalSakit', 'totalAlpa', 'attendanceRate', // Data Global
+            'totalHours', 'avgHours', // Data Global
+            'totalLearning', 'totalExecution', // Data Global
             'magangProgress', 'daysPassed', 'totalDaysInternship', 'daysRemaining',
             'currentDate', 'prevMonth', 'nextMonth'
         ));
     }
 
+    /**
+     * Menampilkan form input presensi baru.
+     */
     public function create()
     {
         return view('attendances.create');
     }
 
+    /**
+     * Menyimpan data presensi dan logbook ke database.
+     */
     public function store(Request $request)
     {
-        // ... (Validasi & Logic Store sama seperti sebelumnya) ...
+        // Validasi input
         $request->validate([
             'status' => 'required|in:hadir,izin,sakit',
         ]);
 
         $user = Auth::user();
 
+        // 1. Simpan Data Presensi (Tabel Parent)
         $attendance = Attendance::create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::today(), // Otomatis tanggal hari ini
             'status' => $request->status,
             'check_in' => $request->check_in,
             'check_out' => $request->check_out,
@@ -159,15 +168,19 @@ class AttendanceController extends Controller
             'mood' => 'neutral',
         ]);
 
+        // 2. Simpan Detail Kegiatan (Tabel Child) - Hanya jika Hadir
         if ($request->status == 'hadir' && $request->has('activities')) {
             foreach ($request->activities as $activity) {
+                // Pastikan tidak menyimpan baris kosong
                 if (!empty($activity['title'])) {
                     DailyActivity::create([
                         'attendance_id' => $attendance->id,
                         'type' => $activity['type'],
                         'title' => $activity['title'],
                         'description' => $activity['description'] ?? '',
-                        'duration_minutes' => 60,
+                        'obstacles' => $activity['obstacles'] ?? null,     // Kendala
+                        'improvements' => $activity['improvements'] ?? null, // Improvement
+                        'duration_minutes' => 60, // Default duration
                     ]);
                 }
             }
@@ -211,7 +224,6 @@ class AttendanceController extends Controller
         ]);
 
         // 2. Update Aktivitas (Cara Bersih: Hapus Lama, Buat Baru)
-        // Ini cara paling aman untuk menangani dynamic form (add/remove row)
         $attendance->daily_activities()->delete();
 
         if ($request->status == 'hadir' && $request->has('activities')) {
@@ -222,6 +234,8 @@ class AttendanceController extends Controller
                         'type' => $activity['type'],
                         'title' => $activity['title'],
                         'description' => $activity['description'] ?? '',
+                        'obstacles' => $activity['obstacles'] ?? null,     // Kendala
+                        'improvements' => $activity['improvements'] ?? null, // Improvement
                         'duration_minutes' => 60,
                     ]);
                 }
@@ -231,6 +245,9 @@ class AttendanceController extends Controller
         return redirect()->route('attendances.index')->with('success', 'Logbook berhasil diperbarui!');
     }
 
+    /**
+     * Download Laporan PDF
+     */
     public function downloadPdf(Request $request)
     {
         $userId = Auth::id();

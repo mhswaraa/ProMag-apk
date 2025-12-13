@@ -3,13 +3,44 @@
 <head>
     <title>Laporan Progress Magang</title>
     <style>
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000; line-height: 1.3; }
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 12px; 
+            color: #000; 
+            line-height: 1.3; 
+        }
         
         /* KOP SURAT */
-        .header-table { width: 100%; margin-bottom: 2px; border-bottom: 3px solid #000; padding-bottom: 10px; }
-        .kop-program { font-size: 14px; font-weight: bold; margin: 0; letter-spacing: 0.5px; text-transform: uppercase; }
-        .kop-perusahaan { font-size: 20px; font-weight: 900; margin: 8px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .kop-alamat { font-size: 11px; font-style: normal; margin: 0; }
+        .header-table { 
+            width: 100%; 
+            margin-bottom: 2px; 
+            border-bottom: 3px solid #000; 
+            padding-bottom: 10px; 
+            table-layout: fixed;
+        }
+        
+        .kop-program { 
+            font-size: 17px; 
+            font-weight: bold; 
+            margin: 0; 
+            letter-spacing: 0.5px; 
+            text-transform: uppercase; 
+        }
+
+        .kop-perusahaan { 
+            font-size: 28px;
+            font-weight: 900; 
+            margin: 5px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 0px;
+            white-space: nowrap;
+        }
+
+        .kop-alamat { 
+            font-size: 11px; 
+            font-style: normal; 
+            margin: 0; 
+        }
         
         /* GARIS PEMISAH KOP */
         .line-thin { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 30px; }
@@ -24,15 +55,17 @@
         .meta-label { font-weight: bold; width: 140px; }
 
         .content-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .content-table th, .content-table td { border: 1px solid #000; padding: 8px; text-align: left; vertical-align: top; }
+        .content-table th, .content-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; }
         .content-table th { background-color: #e0e0e0; font-weight: bold; text-align: center; vertical-align: middle; }
         
         .status-badge { font-weight: bold; text-transform: uppercase; font-size: 10px; }
         
         /* Helper untuk tulisan output */
-        .output-text { color: #444; font-size: 11px; font-style: italic; margin-top: 2px; display: block; }
+        .output-text { color: #444; font-size: 11px; margin-top: 2px; display: block; }
+        .obstacle-text { color: #b91c1c; font-size: 11px; margin-top: 2px; display: block; font-style: italic; }
+        .improvement-text { color: #15803d; font-size: 11px; margin-top: 2px; display: block; font-style: italic; }
 
-        /* FORMAT TANDA TANGAN BARU (3 ORANG) */
+        /* FORMAT TANDA TANGAN */
         .signature-section { margin-top: 40px; page-break-inside: avoid; }
         .signature-table { width: 100%; border: none; text-align: center; }
         .signature-table td { border: none; vertical-align: top; padding: 0; }
@@ -42,7 +75,7 @@
 </head>
 <body>
 
-    <!-- HITUNG ULANG JAM KERJA SECARA PRESISI (MATCHING DASHBOARD) -->
+    <!-- HITUNG ULANG JAM KERJA -->
     @php
         $recalculatedTotalSeconds = 0;
         foreach($attendances as $att) {
@@ -59,32 +92,30 @@
     <table class="header-table">
         <tr>
             <!-- LOGO PERUSAHAAN (KIRI) -->
-            <td width="20%" align="center" style="vertical-align: middle; border: none; padding-right: 10px;">
-                <img src="{{ public_path('images/logo.png') }}" width="100px" style="display: block;">
+            <td width="15%" align="left" style="vertical-align: middle; border: none;">
+                <img src="{{ public_path('images/logo.png') }}" width="135px" style="display: block;">
             </td>
             
             <!-- TEKS KOP (TENGAH) -->
-            <td align="center" style="vertical-align: middle; border: none;">
+            <td width="70%" align="center" style="vertical-align: middle; border: none;">
                 <p class="kop-program">PROGRAM MAGANG LULUSAN S1 KEMNAKER</p>
                 <h1 class="kop-perusahaan">PT. PRIMA SEJATI SEJAHTERA</h1>
                 <p class="kop-alamat">
-                    Desa Butuh, RT.01 / RW.02, Mojosongo, Dukuh, Butuh,<br>
-                    Kec. Mojosongo, Kabupaten Boyolali, Jawa Tengah 57482<br>
-                    Telp: (0276) 322399
+                    Desa Butuh, RT.01 / RW.02, Mojosongo, Dukuh, Butuh, Kec. Mojosongo,<br> 
+                    Kabupaten Boyolali, Jawa Tengah 57482. Telp: (0276) 322399
                 </p>
             </td>
             
             <!-- PENYEIMBANG KANAN (KOSONG) -->
-            <td width="20%" style="border: none;"></td>
+            <td width="15%" style="border: none;"></td>
         </tr>
     </table>
     
-    <!-- Garis Tipis Tambahan -->
     <div class="line-thin"></div>
 
     <!-- JUDUL LAPORAN -->
     <div class="report-title">
-        <h2>LAPORAN PROGRESS MAGANG KEMNAKER BATCH II</h2>
+        <h2>LAPORAN PROGRESS MAGANG KEMNAKER</h2>
         <p>Periode: {{ $startDate->translatedFormat('d F Y') }} - {{ $endDate->translatedFormat('d F Y') }}</p>
     </div>
 
@@ -111,7 +142,7 @@
         <tr>
             <td class="meta-label">Divisi / Posisi</td>
             <td>:</td>
-            <td>Adm. Warehouse</td> 
+            <td>IT Developer Intern</td> 
             
             <td class="meta-label">Sakit / Izin / Alpa</td>
             <td>:</td>
@@ -123,11 +154,11 @@
     <table class="content-table">
         <thead>
             <tr>
-                <th style="width: 30px;">No</th>
-                <th style="width: 90px;">Hari/Tanggal</th>
-                <th style="width: 80px;">Jam Kerja</th>
-                <th style="width: 60px;">Status</th>
-                <th>Uraian Kegiatan & Hasil Pembelajaran</th>
+                <th style="width: 25px;">No</th>
+                <th style="width: 75px;">Hari/Tanggal</th>
+                <th style="width: 75px;">Jam Kerja</th>
+                <th style="width: 50px;">Status</th>
+                <th>Uraian Kegiatan, Kendala & Solusi</th>
             </tr>
         </thead>
         <tbody>
@@ -164,8 +195,18 @@
                                     @foreach($row->daily_activities as $activity)
                                         <li style="margin-bottom: 8px;">
                                             <strong>[{{ $activity->type == 'learning' ? 'Materi' : 'Praktek' }}]</strong> {{ $activity->title }}
+                                            
+                                            <!-- Deskripsi -->
                                             @if($activity->description)
-                                                <span class="output-text">Output: {{ $activity->description }}</span>
+                                                <span class="output-text">Output: {!! nl2br(e($activity->description)) !!}</span>
+                                            @endif
+
+                                            <!-- Kendala & Solusi -->
+                                            @if($activity->obstacles)
+                                                <span class="obstacle-text"><strong>Kendala:</strong> {!! nl2br(e($activity->obstacles)) !!}</span>
+                                            @endif
+                                            @if($activity->improvements)
+                                                <span class="improvement-text"><strong>Solusi:</strong> {!! nl2br(e($activity->improvements)) !!}</span>
                                             @endif
                                         </li>
                                     @endforeach
@@ -195,20 +236,20 @@
             <tr>
                 <td style="width: 40%; text-align: center;">
                     <p>Mengetahui,</p>
-                    <p><strong>Peserta Magang</strong></p>
+                    <p><strong>Mentor / Chief Warehouse</strong></p>
                     
-                    <p class="signature-name">{{ $user->name }}</p>
-                    <p class="signature-role"></p>
+                    <p class="signature-name">( ........................................ )</p>
+                    <p class="signature-role">Jabatan Mentor</p>
                 </td>
                 
                 <td style="width: 20%;"></td> <!-- Spacer Tengah -->
                 
                 <td style="width: 40%; text-align: center;">
                     <p>Boyolali, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                    <p><strong>Mentor / Chief Warehouse</strong></p>
+                    <p><strong>Peserta Magang</strong></p>
                     
-                    <p class="signature-name">( ........................................ )</p>
-                    <p class="signature-role"></p>
+                    <p class="signature-name">{{ $user->name }}</p>
+                    <p class="signature-role">Mahasiswa</p>
                 </td>
             </tr>
         </table>
@@ -221,7 +262,7 @@
                     <p><strong>HRD / Factory Manager</strong></p>
                     
                     <p class="signature-name" style="margin-top: 70px;">( ........................................ )</p>
-                    <p class="signature-role"></p>
+                    <p class="signature-role">Jabatan HRD</p>
                 </td>
             </tr>
         </table>

@@ -3,44 +3,58 @@
     <!-- Main Content Wrapper -->
     <div class="pb-12 bg-slate-50 dark:bg-gray-900 min-h-screen">
         
-        <!-- 1. HERO BANNER SECTION (FUTURISTIC THEME) -->
-        <!-- Gradient Deep Space & Cyberpunk Accents -->
-        <div class="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pb-36 pt-16 rounded-b-[3rem] shadow-2xl shadow-purple-900/20 overflow-hidden">
+        <!-- 1. HERO BANNER SECTION (CAROUSEL THEME) -->
+        <div class="relative pb-36 pt-16 rounded-b-[3rem] shadow-2xl shadow-slate-900/20 overflow-hidden bg-slate-900">
             
-            <!-- Grid Pattern Overlay -->
-            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
-            
-            <!-- Futuristic Glows -->
-            <div class="absolute top-0 left-1/4 -mt-20 w-96 h-96 rounded-full bg-blue-600/30 blur-[100px] animate-pulse"></div>
-            <div class="absolute bottom-0 right-1/4 -mb-20 w-80 h-80 rounded-full bg-purple-600/30 blur-[100px]"></div>
+            <!-- CAROUSEL BACKGROUND -->
+            <div class="absolute inset-0 z-0" id="dashboard-carousel">
+                <!-- Slide 1 -->
+                <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100 carousel-slide">
+                    <img src="{{ asset('images/Carousel1.jpg') }}" class="w-full h-full object-cover" alt="Background 1">
+                </div>
+                <!-- Slide 2 -->
+                <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 carousel-slide">
+                    <img src="{{ asset('images/Carousel2.jpg') }}" class="w-full h-full object-cover" alt="Background 2">
+                </div>
+                <!-- Slide 3 -->
+                <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 carousel-slide">
+                    <img src="{{ asset('images/Carousel3.jpg') }}" class="w-full h-full object-cover" alt="Background 3">
+                </div>
+                
+                <!-- Dark Overlay (Agar teks tetap terbaca) -->
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-900/60 mix-blend-multiply"></div>
+                <!-- Tambahan efek biru/ungu tipis agar tetap ada nuansa tech -->
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-purple-900/30 mix-blend-overlay"></div>
+            </div>
 
+            <!-- Content Banner -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row justify-between items-center">
                 <div class="text-white mb-8 md:mb-0 text-center md:text-left">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-4">
                         <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                         <span class="text-xs font-medium tracking-wider text-green-300 uppercase">System Online</span>
                     </div>
-                    <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-blue-200 drop-shadow-sm">
+                    <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2 text-white drop-shadow-md">
                         Halo, {{ Str::words(Auth::user()->name, 1, '') }}! 🚀
                     </h1>
-                    <p class="text-blue-200/80 text-lg max-w-xl font-light leading-relaxed">
+                    <p class="text-blue-100 text-lg max-w-xl font-light leading-relaxed drop-shadow-sm">
                         Dashboard monitoring aktif. Siap untuk mencetak progress baru hari ini?
                     </p>
                 </div>
                 
-                <!-- Quick Action Button (Glassmorphism & Neon) -->
+                <!-- Quick Action Button -->
                 <div class="flex gap-4">
-                    <button class="group relative px-6 py-3 rounded-2xl bg-slate-800/50 text-white border border-white/10 backdrop-blur-md overflow-hidden transition-all hover:border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                    <a href="{{ route('attendances.create') }}" class="group relative px-6 py-3 rounded-2xl bg-slate-800/50 text-white border border-white/10 backdrop-blur-md overflow-hidden transition-all hover:border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <span class="relative flex items-center gap-2 font-semibold">
                             <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Logbook Baru
                         </span>
-                    </button>
-                    <button class="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg shadow-blue-600/30 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] flex items-center gap-2">
+                    </a>
+                    <a href="{{ route('attendances.create') }}" class="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg shadow-blue-600/30 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                         Presensi Masuk
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -253,4 +267,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('#dashboard-carousel .carousel-slide');
+            let currentSlide = 0;
+            
+            if(slides.length > 0) {
+                setInterval(() => {
+                    // Hide current slide
+                    slides[currentSlide].classList.remove('opacity-100');
+                    slides[currentSlide].classList.add('opacity-0');
+                    
+                    // Move to next slide
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    
+                    // Show next slide
+                    slides[currentSlide].classList.remove('opacity-0');
+                    slides[currentSlide].classList.add('opacity-100');
+                }, 5000); // Ganti gambar setiap 5 detik
+            }
+        });
+    </script>
 </x-app-layout>

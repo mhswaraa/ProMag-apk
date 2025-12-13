@@ -12,7 +12,7 @@
             activities: {{ $attendance->daily_activities->count() ? $attendance->daily_activities->toJson() : '[]' }} 
          })">
          
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Form mengarah ke route UPDATE -->
             <form action="{{ route('attendances.update', $attendance->id) }}" method="POST">
@@ -126,10 +126,26 @@
                                         </div>
                                     </div>
 
-                                    <!-- Kolom Kanan: Deskripsi -->
-                                    <div class="md:col-span-8">
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Deskripsi & Output</label>
-                                        <textarea :name="`activities[${index}][description]`" x-model="activity.description" rows="4" placeholder="Jelaskan detail materi yang dipelajari atau hasil dari pekerjaan yang dilakukan..." class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"></textarea>
+                                    <!-- Kolom Kanan: Deskripsi, Kendala, Solusi -->
+                                    <div class="md:col-span-8 space-y-4">
+                                        <!-- Deskripsi -->
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Deskripsi & Output (Gunakan Poin 1, 2, 3)</label>
+                                            <textarea :name="`activities[${index}][description]`" x-model="activity.description" rows="4" placeholder="1. Mempelajari struktur database...&#10;2. Membuat migrasi tabel..." class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"></textarea>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- Kendala -->
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-red-400 uppercase mb-1">Kendala / Hambatan</label>
+                                                <textarea :name="`activities[${index}][obstacles]`" x-model="activity.obstacles" rows="2" placeholder="Misal: Koneksi internet lambat..." class="w-full rounded-xl border-red-200 focus:border-red-500 focus:ring-red-500 bg-red-50 dark:bg-red-900/10 dark:border-red-800 dark:text-white"></textarea>
+                                            </div>
+                                            <!-- Improvement -->
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-green-500 uppercase mb-1">Improvement / Solusi</label>
+                                                <textarea :name="`activities[${index}][improvements]`" x-model="activity.improvements" rows="2" placeholder="Misal: Menggunakan tethering HP..." class="w-full rounded-xl border-green-200 focus:border-green-500 focus:ring-green-500 bg-green-50 dark:bg-green-900/10 dark:border-green-800 dark:text-white"></textarea>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -156,13 +172,13 @@
         function logbookForm(initialData) {
             return {
                 status: initialData.status || 'hadir',
-                // Cek apakah ada activities lama, jika tidak ada (kosong), buat 1 baris kosong
+                // Cek apakah ada activities lama, jika tidak ada (kosong), buat 1 baris kosong with complete fields
                 activities: (initialData.activities && initialData.activities.length > 0) 
                             ? initialData.activities 
-                            : [{ type: 'learning', title: '', description: '' }],
+                            : [{ type: 'learning', title: '', description: '', obstacles: '', improvements: '' }],
                 
                 addActivity() {
-                    this.activities.push({ type: 'learning', title: '', description: '' });
+                    this.activities.push({ type: 'learning', title: '', description: '', obstacles: '', improvements: '' });
                 },
                 removeActivity(index) {
                     this.activities.splice(index, 1);

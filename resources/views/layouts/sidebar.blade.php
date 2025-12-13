@@ -11,7 +11,7 @@
                 
                 <div>
                     <span class="block text-xl font-bold whitespace-nowrap dark:text-white text-gray-800 tracking-tight">
-                        INTERNSHIP APP
+                        INTERNSHIP
                     </span>
                     <span class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider leading-tight">
                         PT. Pan Brothers Tbk

@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12 bg-slate-50 dark:bg-gray-900 min-h-screen" x-data="logbookForm()">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <form action="{{ route('attendances.store') }}" method="POST">
                 @csrf
@@ -60,11 +60,11 @@
                     <div x-show="status === 'hadir'" x-transition class="mt-6 grid grid-cols-2 gap-6 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Jam Masuk</label>
-                            <input type="time" name="check_in" value="{{ date('08:00') }}" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
+                            <input type="time" name="check_in" value="{{ date('07:00') }}" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Jam Pulang</label>
-                            <input type="time" name="check_out" value="{{ date('17:00') }}" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
+                            <input type="time" name="check_out" value="{{ date('16:00') }}" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
                         </div>
                     </div>
 
@@ -112,10 +112,26 @@
                                         </div>
                                     </div>
 
-                                    <!-- Kolom Kanan: Deskripsi -->
-                                    <div class="md:col-span-8">
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Deskripsi & Output</label>
-                                        <textarea :name="`activities[${index}][description]`" rows="4" placeholder="Jelaskan detail materi yang dipelajari atau hasil dari pekerjaan yang dilakukan..." class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"></textarea>
+                                    <!-- Kolom Kanan: Deskripsi, Kendala, Solusi -->
+                                    <div class="md:col-span-8 space-y-4">
+                                        <!-- Deskripsi -->
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Deskripsi & Output</label>
+                                            <textarea :name="`activities[${index}][description]`" rows="4" placeholder="1. Mempelajari struktur database...&#10;2. Membuat migrasi tabel..." class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"></textarea>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- Kendala -->
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-red-400 uppercase mb-1">Kendala / Hambatan</label>
+                                                <textarea :name="`activities[${index}][obstacles]`" rows="2" placeholder="Misal: Koneksi internet lambat..." class="w-full rounded-xl border-red-200 focus:border-red-500 focus:ring-red-500 bg-red-50 dark:bg-red-900/10 dark:border-red-800 dark:text-white"></textarea>
+                                            </div>
+                                            <!-- Improvement -->
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-green-500 uppercase mb-1">Improvement / Solusi</label>
+                                                <textarea :name="`activities[${index}][improvements]`" rows="2" placeholder="Misal: Menggunakan tethering HP..." class="w-full rounded-xl border-green-200 focus:border-green-500 focus:ring-green-500 bg-green-50 dark:bg-green-900/10 dark:border-green-800 dark:text-white"></textarea>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -141,10 +157,10 @@
             return {
                 status: 'hadir',
                 activities: [
-                    { type: 'learning', title: '', description: '' }
+                    { type: 'learning', title: '', description: '', obstacles: '', improvements: '' }
                 ],
                 addActivity() {
-                    this.activities.push({ type: 'learning', title: '', description: '' });
+                    this.activities.push({ type: 'learning', title: '', description: '', obstacles: '', improvements: '' });
                 },
                 removeActivity(index) {
                     this.activities.splice(index, 1);
